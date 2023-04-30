@@ -1,0 +1,44 @@
+#include <dht.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrytal_I2C lcd (0x3f, 16, 2);
+//Sensor ambiente
+dht DHT;
+#define DHT11_PIN 7
+int button1 = 3;
+int est1;
+//Sensor tierra
+int button2 = 4;
+int est2; 
+int SenTierra = A0;
+void setup()
+{
+  Serial.begin (115200);
+  pinMode(button1, INPUT);
+  pinMode(button2, INPUT);
+}
+
+void loop()
+{
+ DHT.read11 (DHT11_PIN);
+ int est1 = digitalRead (button1);
+ int est2 = digitalRead (button2);
+  //AMBIENTE
+  if (est1 == HIGH){
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0.0);  
+  lcd.print("Temperatura:",DHT.temperature,"C");  
+  lcd.setCursor(0.1);
+  lcd.print("Humidity",DHT.humidity,"%");
+  }
+if (est2 == HIGH){
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0.0);  
+  lcd.print("Humedad de tierra:");  
+  lcd.setCursor(0.1);
+  lcd.print(SenTierra);
+  }
+}
