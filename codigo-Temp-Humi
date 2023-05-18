@@ -1,44 +1,77 @@
-#include <dht.h>
 #include <LiquidCrystal_I2C.h>
-LiquidCrytal_I2C lcd (0x3f, 16, 2);
-//Sensor ambiente
+LiquidCrystal_I2C lcd (0x27, 16, 2);
+#include <dht.h>
 dht DHT;
-#define DHT11_PIN 7
+#define DHT11_PIN 2
+
+//SENSOR AMBIENTE
+int tecla;
 int button1 = 3;
 int est1;
-//Sensor tierra
 int button2 = 4;
-int est2; 
-int SenTierra = A0;
-void setup()
-{
+int est2;
+//SENSOR TIERRA
+float SenTierra = A0;
+
+
+void setup() {
+  Serial.available();
+  //Serial.begin(9600);
   Serial.begin (115200);
   pinMode(button1, INPUT);
   pinMode(button2, INPUT);
 }
 
-void loop()
-{
- DHT.read11 (DHT11_PIN);
- int est1 = digitalRead (button1);
- int est2 = digitalRead (button2);
-  //AMBIENTE
-  if (est1 == HIGH){
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0.0);  
-  lcd.print("Temperatura:",DHT.temperature,"C");  
-  lcd.setCursor(0.1);
-  lcd.print("Humidity",DHT.humidity,"%");
-  }
-if (est2 == HIGH){
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0.0);  
-  lcd.print("Humedad de tierra:");  
-  lcd.setCursor(0.1);
-  lcd.print(SenTierra);
+void loop() {
+  DHT.read11(DHT11_PIN);
+
+  //TEMPERATURA//
+  Serial.print("Temperatura = ");
+  Serial.print(DHT.temperature);
+  Serial.println(" °C");
+
+  //HUMEDAD RELATIVA//
+  Serial.print("Humedad = ");
+  Serial.print(DHT.humidity);
+  Serial.println(" %");
+  delay(2000);
+
+
+  SenTierra = (5.06 * analogRead(A0) * 100.0) / 1023.0;
+  SenTierra = map(SenTierra, 0,1023,115,0);
+  DHT.read11 (DHT11_PIN);
+  int est1 = digitalRead (button1);
+  int est2 = digitalRead (button2);
+  //<<---------------AMBIENTE--------------->>
+
+  if (Serial.available() > 0) {
+    tecla = Serial.read();
+    if (tecla == 'A') {
+      //HUMEDAD RELATIVA//
+      Serial.print("Humedad = ");
+      Serial.print(DHT.humidity);
+      Serial.println(" %");
+
+      
+      delay(2000);
+      lcd.init();
+      lcd.backlight();
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print(DHT.temperature);
+      lcd.setCursor(0, 1);
+      lcd.print(DHT.humidity);
+    }
+    //<<---------------TIERRA--------------->>
+    if (tecla == 'B') {
+     
+      lcd.init();
+       lcd.clear();
+      lcd.backlight();
+      lcd.setCursor(0, 0);
+      lcd.print("Humedad-tierra:");
+      lcd.setCursor(0, 1);
+      lcd.print(SenTierra);
+    }
   }
 }
